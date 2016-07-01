@@ -5,13 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HomeSync"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
-        Loaded="Window_Loaded">
+        Title="HomeSync" Height="350" Width="525"
+        Loaded="Window_Loaded"
+        >
+
     <ScrollViewer>
         <StackPanel MaxHeight="800">
-            <TextBox x:Name="remote" Text="\\home\sync"/>
-            <TextBox x:Name="local" Text="C:/sync/"/>
+            <TextBox x:Name="remote" Text="\\zilaiszilons\edza\"/>
+            <TextBox x:Name="local" Text="C:\\Users\edza\Documents\NotepadPlusPlus2\"/>
             <Button x:Name="syncButton" Content="Sync now"/>
+            <TextBox x:Name="lastUpdate" IsReadOnly="True"/>
             <ListBox x:Name="eventLog"/>
         </StackPanel>
     </ScrollViewer>

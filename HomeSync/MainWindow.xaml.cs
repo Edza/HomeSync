@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,6 +25,97 @@ namespace HomeSync
         public MainWindow()
         {
             InitializeComponent();
+            syncButton.Click += SyncButton_Click;
+
+            StartTimer();
+        }
+
+        private async void StartTimer()
+        {
+            while (true)
+            {
+                Sync();
+                await Task.Delay(5 * 60 * 1000);
+            }
+        }
+
+        private void SyncButton_Click(object sender, RoutedEventArgs e)
+        {
+            Sync();
+        }
+
+        private void Sync()
+        {
+            lastUpdate.Text = "Last sync: Working...";
+
+            var remotedir = Directory.EnumerateFiles(remote.Text).Select(System.IO.Path.GetFileName);
+            var localdir = Directory.EnumerateFiles(local.Text).Select(System.IO.Path.GetFileName);
+
+            var newRemote = remotedir.Except(localdir);
+            var newLocal = localdir.Except(remotedir);
+            var matching = remotedir.Intersect(localdir);
+
+            foreach (var file in newRemote)
+            {
+                try
+                {
+                    File.Copy(remote.Text + file, local.Text + file, true);
+                    Log($"New {file}");
+                }
+                catch (Exception)
+                {
+
+                    Log($"[FAILED] New {file}");
+                }
+            }
+
+            foreach (var file in newLocal)
+            {
+                try
+                {
+                    File.Copy(local.Text + file, remote.Text + file, true);
+                    Log($"Sending {file}");
+                }
+                catch (Exception)
+                {
+
+                    Log($"[FAILED] Sending {file}");
+                }
+            }
+
+            foreach (var file in matching)
+            {
+                var localMinusRemote = File.GetLastWriteTimeUtc(local.Text + file) - File.GetLastWriteTimeUtc(remote.Text + file);
+
+                if (localMinusRemote > TimeSpan.Zero)
+                {
+                    try
+                    {
+                        File.Copy(local.Text + file, remote.Text + file, true);
+                        Log($"Update {file}");
+                    }
+                    catch (Exception ex)
+                    {
+
+                        Log($"[FAILED] Update {file}");
+                    }
+                }
+                else if (localMinusRemote < TimeSpan.Zero)
+                {
+                    try
+                    {
+                        File.Copy(remote.Text + file, local.Text + file, true);
+                        Log($"Outdated {file}");
+                    }
+                    catch (Exception ex)
+                    {
+
+                        Log($"[FAILED] Outdated {file}");
+                    }
+                }
+            }
+
+            lastUpdate.Text = "Last sync: " + DateTime.Now.ToShortTimeString();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -32,7 +125,7 @@ namespace HomeSync
 
         private void Log(string s)
         {
-            this.eventLog.Items.Add(DateTime.Now.ToString("hh:mm:ss") + " : " + s);
+            this.eventLog.Items.Add(DateTime.Now.ToString("HH:mm:ss") + " : " + s);
         }
     }
 }
