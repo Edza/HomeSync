@@ -8,7 +8,6 @@
         Title="HomeSync" Height="350" Width="525"
         Loaded="Window_Loaded"
         >
-
     <ScrollViewer>
         <StackPanel MaxHeight="800">
             <TextBox x:Name="remote" Text="\\zilaiszilons\edza\"/>
