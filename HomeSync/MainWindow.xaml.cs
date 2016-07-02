@@ -48,8 +48,21 @@ namespace HomeSync
         {
             lastUpdate.Text = "Last sync: Working...";
 
-            var remotedir = Directory.EnumerateFiles(remote.Text).Select(System.IO.Path.GetFileName);
-            var localdir = Directory.EnumerateFiles(local.Text).Select(System.IO.Path.GetFileName);
+            IEnumerable<string> remotedir = null;
+            IEnumerable<string> localdir = null;
+
+            try
+            {
+                remotedir = Directory.EnumerateFiles(remote.Text).Select(System.IO.Path.GetFileName);
+                localdir = Directory.EnumerateFiles(local.Text).Select(System.IO.Path.GetFileName);
+            }
+            catch (Exception)
+            {
+
+                lastUpdate.Text = "Last sync: Directory not found";
+                return;
+            }
+            
 
             var newRemote = remotedir.Except(localdir);
             var newLocal = localdir.Except(remotedir);
